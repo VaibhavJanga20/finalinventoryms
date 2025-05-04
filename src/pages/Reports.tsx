@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ReportNavigationMenu } from "@/components/ReportNavigationMenu";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import {
   ResponsiveContainer, Cell,
   AreaChart, Area
 } from "recharts";
+import { InventoryReport } from "@/components/InventoryReports";
+import { CustomerReport } from "@/components/CustomerReports";
 
 type ReportCategory = "financial" | "inventory" | "customer";
 type ReportType = string;
@@ -699,130 +700,4 @@ function SalesAnalysisReport() {
               <YAxis />
               <Tooltip formatter={(value) => `$${value}`} />
               <Legend />
-              <Bar dataKey="electronics" name="Electronics" fill="#8B5CF6" />
-              <Bar dataKey="furniture" name="Furniture" fill="#D946EF" />
-              <Bar dataKey="clothing" name="Clothing" fill="#F97316" />
-              <Bar dataKey="books" name="Books" fill="#0EA5E9" />
-              <Bar dataKey="other" name="Other" fill="#10B981" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-medium mb-4">Sales by Region</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={salesByRegion}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {salesByRegion.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-medium mb-4">Monthly Sales Trend</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart 
-                data={salesData.map(item => ({ 
-                  month: item.month, 
-                  total: item.electronics + item.furniture + item.clothing + item.books + item.other
-                }))}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `$${value}`} />
-                <Line 
-                  type="monotone" 
-                  dataKey="total" 
-                  name="Total Sales" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={2}
-                  dot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-medium mb-4">Top Selling Products</h3>
-        <table className="min-w-full border border-gray-200 rounded-md">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left">Product Name</th>
-              <th className="px-4 py-2 text-left">Category</th>
-              <th className="px-4 py-2 text-right">Revenue</th>
-              <th className="px-4 py-2 text-right">Units Sold</th>
-              <th className="px-4 py-2 text-right">Avg. Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topProducts.map((product, index) => (
-              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                <td className="px-4 py-2">{product.name}</td>
-                <td className="px-4 py-2">{product.category}</td>
-                <td className="px-4 py-2 text-right">${product.revenue.toLocaleString()}</td>
-                <td className="px-4 py-2 text-right">{product.units}</td>
-                <td className="px-4 py-2 text-right">
-                  ${(product.revenue / product.units).toFixed(2)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-// Inventory Report Component
-function InventoryReport({ reportType }: { reportType: string }) {
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">
-        {reportType === "stock-levels" ? "Inventory Stock Levels" : 
-         reportType === "category-distribution" ? "Inventory Category Distribution" : 
-         reportType === "low-stock-items" ? "Low Stock Items" :
-         reportType === "inventory-value" ? "Inventory Value Analysis" : 
-         "Inventory Turnover Analysis"}
-      </h2>
-      <p className="text-gray-600">This is a placeholder for the {reportType} report.</p>
-    </div>
-  );
-}
-
-// Customer Report Component
-function CustomerReport({ reportType }: { reportType: string }) {
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">
-        {reportType === "customer-acquisition" ? "Customer Acquisition" : 
-         reportType === "retention-rate" ? "Customer Retention Rate" : 
-         reportType === "lifetime-value" ? "Customer Lifetime Value" :
-         reportType === "geographic-distribution" ? "Customer Geographic Distribution" : 
-         "Customer Order History"}
-      </h2>
-      <p className="text-gray-600">This is a placeholder for the {reportType} report.</p>
-    </div>
-  );
-}
+              <Bar dataKey="electronics" name

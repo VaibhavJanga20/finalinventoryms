@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { Plus, Pencil, Trash2, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
+import { ReportButton } from "../components/ReportButton";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,15 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, 
-  ResponsiveContainer, PieChart, Pie, Cell 
+  BarChart, Bar, PieChart, Pie, 
+  XAxis, YAxis, Tooltip, 
+  ResponsiveContainer, Cell, Legend, CartesianGrid
 } from "recharts";
 
 type Employee = {
@@ -31,20 +25,14 @@ type Employee = {
   department: string;
   email: string;
   phone: string;
-  startDate: string;
 };
 
 const initialEmployees: Employee[] = [
-  { id: "EMP-001", name: "John Smith", position: "Warehouse Manager", department: "Operations", email: "john@example.com", phone: "555-123-4567", startDate: "2022-03-15" },
-  { id: "EMP-002", name: "Sarah Johnson", position: "Inventory Specialist", department: "Operations", email: "sarah@example.com", phone: "555-234-5678", startDate: "2022-04-10" },
-  { id: "EMP-003", name: "Michael Brown", position: "Sales Representative", department: "Sales", email: "michael@example.com", phone: "555-345-6789", startDate: "2022-05-22" },
-  { id: "EMP-004", name: "Emily Davis", position: "Customer Service", department: "Customer Support", email: "emily@example.com", phone: "555-456-7890", startDate: "2022-06-14" },
-  { id: "EMP-005", name: "David Miller", position: "Logistics Coordinator", department: "Operations", email: "david@example.com", phone: "555-567-8901", startDate: "2022-07-08" },
-  { id: "EMP-006", name: "Jennifer Wilson", position: "HR Specialist", department: "Human Resources", email: "jennifer@example.com", phone: "555-678-9012", startDate: "2022-08-19" },
-  { id: "EMP-007", name: "Robert Taylor", position: "Financial Analyst", department: "Finance", email: "robert@example.com", phone: "555-789-0123", startDate: "2022-09-05" },
-  { id: "EMP-008", name: "Lisa Anderson", position: "Marketing Specialist", department: "Marketing", email: "lisa@example.com", phone: "555-890-1234", startDate: "2022-10-12" },
-  { id: "EMP-009", name: "James Thomas", position: "IT Support", department: "IT", email: "james@example.com", phone: "555-901-2345", startDate: "2022-11-30" },
-  { id: "EMP-010", name: "Michelle Garcia", position: "Purchasing Agent", department: "Procurement", email: "michelle@example.com", phone: "555-012-3456", startDate: "2023-01-17" },
+  { id: "EMP-001", name: "John Smith", position: "Sales Manager", department: "Sales", email: "john.smith@example.com", phone: "123-456-7890" },
+  { id: "EMP-002", name: "Emily Johnson", position: "Marketing Coordinator", department: "Marketing", email: "emily.johnson@example.com", phone: "987-654-3210" },
+  { id: "EMP-003", name: "Michael Brown", position: "Software Engineer", department: "IT", email: "michael.brown@example.com", phone: "555-123-4567" },
+  { id: "EMP-004", name: "Sarah Williams", position: "HR Specialist", department: "HR", email: "sarah.williams@example.com", phone: "111-222-3333" },
+  { id: "EMP-005", name: "David Miller", position: "Accountant", department: "Finance", email: "david.miller@example.com", phone: "444-555-6666" },
 ];
 
 export default function Employees() {
@@ -59,6 +47,7 @@ export default function Employees() {
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -85,8 +74,7 @@ export default function Employees() {
             position: data.position,
             department: data.department,
             email: data.email,
-            phone: data.phone,
-            startDate: data.startDate
+            phone: data.phone
           }
         : employee
     );
@@ -104,8 +92,7 @@ export default function Employees() {
       position: data.position,
       department: data.department,
       email: data.email,
-      phone: data.phone,
-      startDate: data.startDate
+      phone: data.phone
     };
     setEmployees([...employees, newEmployee]);
     toast({
@@ -113,43 +100,6 @@ export default function Employees() {
       description: `${newEmployee.name} has been added to the employee list.`,
     });
   };
-
-  // Generate department data for reports
-  const getDepartmentData = () => {
-    const departments: Record<string, number> = {};
-    employees.forEach(employee => {
-      if (departments[employee.department]) {
-        departments[employee.department]++;
-      } else {
-        departments[employee.department] = 1;
-      }
-    });
-    
-    return Object.keys(departments).map(department => ({
-      name: department,
-      value: departments[department]
-    }));
-  };
-
-  // Get employee hire dates by year/month for timeline chart
-  const getHireDateData = () => {
-    const hireData: Record<string, number> = {};
-    employees.forEach(employee => {
-      const yearMonth = employee.startDate.substring(0, 7); // YYYY-MM
-      if (hireData[yearMonth]) {
-        hireData[yearMonth]++;
-      } else {
-        hireData[yearMonth] = 1;
-      }
-    });
-    
-    return Object.keys(hireData).sort().map(date => ({
-      date: date,
-      count: hireData[date]
-    }));
-  };
-
-  const COLORS = ["#8B5CF6", "#D946EF", "#F97316", "#0EA5E9", "#10B981", "#F59E0B", "#EF4444", "#6366F1"];
 
   return (
     <div>
@@ -159,14 +109,7 @@ export default function Employees() {
           <p className="text-gray-600 text-sm">Manage employee information</p>
         </div>
         <div className="flex space-x-3">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
-            onClick={() => setIsReportOpen(true)}
-          >
-            <BarChart3 size={18} />
-            <span>Reports</span>
-          </Button>
+          <ReportButton title="Employees" type="employees" data={employees} />
           <Button 
             className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
             onClick={() => setIsAddDialogOpen(true)}
@@ -196,7 +139,7 @@ export default function Employees() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                 <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -204,18 +147,11 @@ export default function Employees() {
               {filteredEmployees.map((employee) => (
                 <tr key={employee.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{employee.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex-shrink-0 mr-4 bg-purple-100 text-purple-600 rounded-full border border-purple-200 flex items-center justify-center">
-                        {employee.name.charAt(0)}
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">{employee.name}</div>
-                    </div>
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.position}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.department}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.startDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.phone}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -256,8 +192,7 @@ export default function Employees() {
             { name: "position", label: "Position", type: "text", value: selectedEmployee.position },
             { name: "department", label: "Department", type: "text", value: selectedEmployee.department },
             { name: "email", label: "Email", type: "email", value: selectedEmployee.email },
-            { name: "phone", label: "Phone", type: "text", value: selectedEmployee.phone },
-            { name: "startDate", label: "Start Date", type: "date", value: selectedEmployee.startDate },
+            { name: "phone", label: "Phone", type: "tel", value: selectedEmployee.phone },
           ]}
         />
       )}
@@ -273,111 +208,100 @@ export default function Employees() {
             { name: "position", label: "Position", type: "text" },
             { name: "department", label: "Department", type: "text" },
             { name: "email", label: "Email", type: "email" },
-            { name: "phone", label: "Phone", type: "text" },
-            { name: "startDate", label: "Start Date", type: "date" },
+            { name: "phone", label: "Phone", type: "tel" },
           ]}
         />
       )}
 
-      {/* Employee Reports Dialog */}
-      <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
-        <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Employee Reports</DialogTitle>
-          </DialogHeader>
-          
-          <div className="mt-4 space-y-8">
-            <div>
-              <h3 className="font-medium text-lg mb-4">Employee Overview</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Total Employees</p>
-                  <p className="text-2xl font-semibold">{employees.length}</p>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Departments</p>
-                  <p className="text-2xl font-semibold">{getDepartmentData().length}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Newest Employee</p>
-                  <p className="text-2xl font-semibold">
-                    {employees.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0]?.startDate}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium mb-4">Employees by Department</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={getDepartmentData()}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {getDepartmentData().map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-4">Employee Hire Timeline</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={getHireDateData()}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#8B5CF6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-4">Department Breakdown</h3>
-              <table className="min-w-full border border-gray-200 rounded-md">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left">Department</th>
-                    <th className="px-4 py-2 text-left">Number of Employees</th>
-                    <th className="px-4 py-2 text-left">% of Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {getDepartmentData().map((dept, index) => (
-                    <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                      <td className="px-4 py-2">{dept.name}</td>
-                      <td className="px-4 py-2">{dept.value}</td>
-                      <td className="px-4 py-2">{((dept.value / employees.length) * 100).toFixed(1)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Employee Report Dialog */}
+      {isReportOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium text-gray-800">Employee Report</h3>
+            <EmployeeReportContent />
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setIsReportOpen(false)}>Close</Button>
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button onClick={() => setIsReportOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }
+
+// Add the CartesianGrid report component for employee reports
+const EmployeeReportContent = () => {
+  // Sample data for demonstration
+  const employeePerformanceData = [
+    { month: "Jan", sales: 42, tasks: 38 },
+    { month: "Feb", sales: 47, tasks: 42 },
+    { month: "Mar", sales: 53, tasks: 45 },
+    { month: "Apr", sales: 58, tasks: 48 },
+    { month: "May", sales: 63, tasks: 52 },
+    { month: "Jun", sales: 68, tasks: 55 },
+  ];
+
+  const departmentData = [
+    { name: "Sales", value: 35 },
+    { name: "Operations", value: 25 },
+    { name: "Admin", value: 20 },
+    { name: "Support", value: 15 },
+    { name: "HR", value: 5 },
+  ];
+
+  const COLORS = ["#8B5CF6", "#D946EF", "#F97316", "#0EA5E9", "#10B981"];
+
+  return (
+    <div className="space-y-8 p-4">
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Employee Performance Report</h2>
+        <p className="text-gray-600 mb-6">For the period: January 1, 2025 - June 30, 2025</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 className="font-medium mb-4">Employee Performance Trends</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={employeePerformanceData}>
+                <CartesianGrid />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="sales" name="Sales Completed" fill="#8B5CF6" />
+                <Bar dataKey="tasks" name="Tasks Completed" fill="#D946EF" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-medium mb-4">Department Distribution</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={departmentData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {departmentData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
