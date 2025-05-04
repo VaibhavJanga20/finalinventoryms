@@ -700,4 +700,67 @@ function SalesAnalysisReport() {
               <YAxis />
               <Tooltip formatter={(value) => `$${value}`} />
               <Legend />
-              <Bar dataKey="electronics" name
+              <Bar dataKey="electronics" name="Electronics" fill="#8B5CF6" />
+              <Bar dataKey="furniture" name="Furniture" fill="#D946EF" />
+              <Bar dataKey="clothing" name="Clothing" fill="#F97316" />
+              <Bar dataKey="books" name="Books" fill="#0EA5E9" />
+              <Bar dataKey="other" name="Other" fill="#10B981" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 className="font-medium mb-4">Top Products by Revenue</h3>
+          <table className="min-w-full">
+            <thead>
+              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-2">Product</th>
+                <th className="px-4 py-2">Category</th>
+                <th className="px-4 py-2 text-right">Revenue</th>
+                <th className="px-4 py-2 text-right">Units Sold</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {topProducts.map((product, index) => (
+                <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <td className="px-4 py-3 text-sm">{product.name}</td>
+                  <td className="px-4 py-3 text-sm">{product.category}</td>
+                  <td className="px-4 py-3 text-sm text-right">${product.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm text-right">{product.units.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 className="font-medium mb-4">Sales by Region</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={salesByRegion}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {salesByRegion.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
