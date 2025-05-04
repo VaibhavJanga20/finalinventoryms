@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { Plus } from "lucide-react";
+import { Plus, SortAsc, SortDesc } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
@@ -34,12 +34,33 @@ export default function Categories() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [sortField, setSortField] = useState<'items' | 'createdOn'>('items');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    if (sortField === 'items') {
+      return sortDirection === 'asc' ? a.items - b.items : b.items - a.items;
+    } else {
+      return sortDirection === 'asc' 
+        ? new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime()
+        : new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
+    }
+  });
+
+  const handleSort = (field: 'items' | 'createdOn') => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc'); // Default to descending when changing field
+    }
+  };
 
   const handleEdit = (category: Category) => {
     setSelectedCategory(category);
@@ -108,13 +129,31 @@ export default function Categories() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdOn')}>
+                    <span>Created On</span>
+                    {sortField === 'createdOn' && (
+                      <span className="ml-1">
+                        {sortDirection === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center cursor-pointer" onClick={() => handleSort('items')}>
+                    <span>Items</span>
+                    {sortField === 'items' && (
+                      <span className="ml-1">
+                        {sortDirection === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />}
+                      </span>
+                    )}
+                  </div>
+                </th>
                 <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCategories.map((category) => (
+              {sortedCategories.map((category) => (
                 <tr key={category.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">

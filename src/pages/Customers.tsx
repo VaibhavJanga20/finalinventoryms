@@ -1,11 +1,20 @@
 
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "../components/ReportButton";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 type Customer = {
   id: string;
@@ -40,21 +49,35 @@ const initialCustomers: Customer[] = [
 
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
+  // Get unique states for the filter dropdown
+  const uniqueStates = Array.from(new Set(customers.map(customer => customer.state))).sort();
+
   const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.id.toLowerCase().includes(searchTerm.toLowerCase())
+    customer.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (stateFilter === "" || customer.state === stateFilter)
   );
 
   const handleEdit = (customer: Customer) => {
     setSelectedCustomer(customer);
     setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = (customer: Customer) => {
+    const updatedCustomers = customers.filter(c => c.id !== customer.id);
+    setCustomers(updatedCustomers);
+    toast({
+      title: "Customer deleted",
+      description: `${customer.name} has been removed from the customer list.`,
+    });
   };
 
   const handleSave = (data: Record<string, any>) => {
@@ -70,6 +93,10 @@ export default function Customers() {
         : customer
     );
     setCustomers(updatedCustomers);
+    toast({
+      title: "Customer updated",
+      description: `${data.name} has been updated successfully.`,
+    });
   };
 
   const handleAdd = (data: Record<string, any>) => {
@@ -81,6 +108,10 @@ export default function Customers() {
       zipcode: data.zipcode
     };
     setCustomers([...customers, newCustomer]);
+    toast({
+      title: "Customer added",
+      description: `${newCustomer.name} has been added to the customer list.`,
+    });
   };
 
   return (
@@ -106,11 +137,29 @@ export default function Customers() {
         <div className="p-4 border-b border-gray-200">
           <h2 className="font-medium text-lg">Customer List</h2>
         </div>
-        <div className="p-4">
-          <SearchBar 
-            placeholder="Search customers..."
-            onSearch={setSearchTerm}
-          />
+        <div className="p-4 flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
+          <div className="flex-1">
+            <SearchBar 
+              placeholder="Search customers..."
+              onSearch={setSearchTerm}
+            />
+          </div>
+          <div className="w-full md:w-64">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="state-filter">Filter by State</Label>
+              <select
+                id="state-filter"
+                value={stateFilter}
+                onChange={(e) => setStateFilter(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">All States</option>
+                {uniqueStates.map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -139,14 +188,27 @@ export default function Customers() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.city}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.state}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.zipcode}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleEdit(customer)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </Button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.625 7.5C3.625 8.12 3.12 8.625 2.5 8.625C1.88 8.625 1.375 8.12 1.375 7.5C1.375 6.88 1.88 6.375 2.5 6.375C3.12 6.375 3.625 6.88 3.625 7.5ZM8.625 7.5C8.625 8.12 8.12 8.625 7.5 8.625C6.88 8.625 6.375 8.12 6.375 7.5C6.375 6.88 6.88 6.375 7.5 6.375C8.12 6.375 8.625 6.88 8.625 7.5ZM13.625 7.5C13.625 8.12 13.12 8.625 12.5 8.625C11.88 8.625 11.375 8.12 11.375 7.5C11.375 6.88 11.88 6.375 12.5 6.375C13.12 6.375 13.625 6.88 13.625 7.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                          </svg>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(customer)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(customer)}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}

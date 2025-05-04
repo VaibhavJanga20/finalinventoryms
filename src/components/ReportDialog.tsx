@@ -68,7 +68,7 @@ export function ReportDialog({ isOpen, onClose, title, type, data }: ReportDialo
 function ProductReport({ data }: { data: any[] }) {
   const categoryData = processCategoryData(data);
   const priceRangeData = processPriceRangeData(data);
-  const topSellingProducts = [...data].sort((a, b) => b.stock - a.stock).slice(0, 5);
+  const productsByStock = [...data].sort((a, b) => b.stock - a.stock);
   const productsByCategory = getProductsByCategory(data);
   
   return (
@@ -137,7 +137,7 @@ function ProductReport({ data }: { data: any[] }) {
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Top 5 Products by Stock</h3>
+        <h3 className="font-medium mb-4">All Products By Stock (Descending)</h3>
         <table className="min-w-full border border-gray-200 rounded-md">
           <thead>
             <tr className="bg-gray-50">
@@ -149,7 +149,7 @@ function ProductReport({ data }: { data: any[] }) {
             </tr>
           </thead>
           <tbody>
-            {topSellingProducts.map((product, index) => (
+            {productsByStock.map((product, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                 <td className="px-4 py-2">{product.id}</td>
                 <td className="px-4 py-2">{product.name}</td>
